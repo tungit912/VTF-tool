@@ -1,0 +1,434 @@
+<!Vũ Việt Tùng; SĐT: 0982959361>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ghép File VTF_TID thi cấp</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --primary:#0f62fe;
+      --primary-dark:#0043ce;
+      --text:#152033;
+      --muted:#5f6b7a;
+      --border:#d9e2ec;
+      --ok:#1f9d55;
+      --warn:#d64545;
+      --soft:#eef4ff;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:linear-gradient(180deg,#eef5ff 0%,#f8fbff 45%,#f4f7fb 100%);
+      color:var(--text);
+    }
+	.header{
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	gap:20px;
+	margin-bottom:10px;
+    }
+
+	.logo{
+	width:80px;
+	height:80px;
+	object-fit:contain;
+	}
+
+	.title{
+	text-align:center;
+	}
+
+	.title h1{
+	margin:0;
+	font-size:26px;
+	}
+
+	.title h2{
+	margin:4px 0 0;
+	font-size:18px;
+	font-weight:500;
+	color:var(--muted);
+	}
+    .wrap{
+      max-width:1200px;
+      margin:24px auto;
+      padding:0 16px 32px;
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:18px;
+      box-shadow:0 8px 24px rgba(15,35,95,.08);
+      padding:18px;
+      margin-bottom:18px;
+    }
+    h1{margin:0 0 8px;font-size:28px}
+    .sub{color:var(--muted);line-height:1.5}
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+      gap:14px;
+      margin-top:14px;
+    }
+    .field{
+      border:1px dashed #b7c6d8;
+      border-radius:14px;
+      padding:14px;
+      background:#fbfdff;
+    }
+    .field h3{margin:0 0 10px;font-size:16px}
+    .field p{margin:0 0 10px;color:var(--muted);font-size:14px}
+    input[type=file]{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;background:#fff}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    button{
+      border:none;
+      border-radius:12px;
+      padding:11px 16px;
+      font-weight:700;
+      cursor:pointer;
+      transition:.18s ease;
+    }
+    button:hover{transform:translateY(-1px)}
+    .primary{background:var(--primary);color:#fff}
+    .primary:hover{background:var(--primary-dark)}
+    .ghost{background:#edf3ff;color:var(--primary)}
+    .mutedbtn{background:#eef2f7;color:#334155}
+    button:disabled{opacity:.55;cursor:not-allowed;transform:none}
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:14px}
+    .stat{background:var(--soft);border:1px solid #d9e7ff;border-radius:14px;padding:14px}
+    .stat .label{font-size:13px;color:var(--muted);margin-bottom:6px}
+    .stat .value{font-size:26px;font-weight:700}
+    .ok{color:var(--ok)}
+    .warn{color:var(--warn)}
+    .table-wrap{overflow:auto;border:1px solid var(--border);border-radius:14px}
+    table{border-collapse:collapse;width:100%;min-width:760px;background:#fff}
+    th,td{border-bottom:1px solid #e8eef5;padding:10px 12px;text-align:left;font-size:14px}
+    th{background:#f5f8fc;position:sticky;top:0;z-index:1}
+    tr:hover td{background:#fafcff}
+    tr.not-found td{background:#fff5f5}
+    .pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}
+    .pill.ok{background:#e9f8ef;color:#166534}
+    .pill.warn{background:#fff1f1;color:#b42318}
+    .hint{font-size:13px;color:var(--muted)}
+    .mono{font-family:Consolas,monospace}
+    .footer-note{font-size:13px;color:var(--muted);margin-top:10px}
+	</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="header">
+  <img src="logo.jpg" class="logo">
+  <div class="title">
+    <h1>Phần mềm tạo danh sách thi cấp</h1>
+    <h2>Thuận tiện, hiệu quả, dễ sử dụng</h2>
+	<h2>Liên hệ ngay để được ưu đãi</h2>
+  </div>
+</div>
+      <div class="grid">
+        <div class="field">
+          <h3>1) File danh sách hội viên (DSHV.xlsx)</h3>
+          <input type="file" id="fileDSHV" accept=".xlsx,.xls" />
+        </div>
+        <div class="field">
+          <h3>2) File danh sách của VTF</h3>
+          <input type="file" id="fileVTF" accept=".xlsx,.xls" />
+        </div>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <button class="primary" id="btnMerge">Ghép dữ liệu</button>
+        <button class="ghost" id="btnDownload" disabled>Tải file Excel kết quả</button>
+        <button class="mutedbtn" id="btnReset">Làm mới</button>
+      </div>
+      <div class="footer-note" id="status">Sẵn sàng.</div>
+      <div class="stats" id="stats" style="display:none">
+        <div class="stat"><div class="label">Tổng dòng file VTF</div><div class="value" id="stTotal">0</div></div>
+        <div class="stat"><div class="label">Khớp họ tên</div><div class="value ok" id="stMatched">0</div></div>
+        <div class="stat"><div class="label">Không tìm thấy mã</div><div class="value warn" id="stNotFound">0</div></div>
+        <div class="stat"><div class="label">Tổng hội viên trong DSHV</div><div class="value" id="stMembers">0</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between;margin-bottom:15px">
+        <h3 style="margin:0">Xem trước kết quả</h3>
+        <div class="hint"></div>
+      </div>
+      <div class="table-wrap">
+        <table id="previewTable">
+          <thead></thead>
+          <tbody>
+            <tr><td class="hint">Chưa có dữ liệu.</td></tr>
+          </tbody>
+        </table>
+      </div>
+	  <div class="table-wrap">
+        <table id="previewTable">
+          <thead></thead>
+          <tbody>
+            <tr><td class="hint">Liên hệ: Vũ Việt Tùng; SĐT: 0982.959.361</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const fileDSHV = $('fileDSHV');
+    const fileVTF = $('fileVTF');
+    const btnMerge = $('btnMerge');
+    const btnDownload = $('btnDownload');
+    const btnReset = $('btnReset');
+    const statusBox = $('status');
+    const previewTable = $('previewTable');
+    const statsBox = $('stats');
+
+    let mergedRows = [];
+
+    function normalizeText(v){
+      return String(v ?? '')
+        .replace(/\s+/g,' ')
+        .replace(/\n/g,' ')
+        .trim()
+        .toLowerCase();
+    }
+
+    function setStatus(msg, isError=false){
+      statusBox.textContent = msg;
+      statusBox.style.color = isError ? 'var(--warn)' : 'var(--muted)';
+    }
+
+    function readFileAsArrayBuffer(file){
+      return new Promise((resolve,reject)=>{
+        const reader = new FileReader();
+        reader.onload = (e)=> resolve(e.target.result);
+        reader.onerror = ()=> reject(new Error('Không đọc được file: ' + file.name));
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    function sheetToRows(ws){
+      return XLSX.utils.sheet_to_json(ws,{header:1, defval:'', blankrows:false, raw:false});
+    }
+
+    function findBestHeaderRow(rows, requiredKeys){
+      let bestIndex = -1;
+      let bestScore = -1;
+      for(let i=0;i<Math.min(rows.length, 20);i++){
+        const row = rows[i].map(normalizeText);
+        let score = 0;
+        requiredKeys.forEach(group=>{
+          if(group.some(key=>row.some(cell=>cell.includes(key)))) score++;
+        });
+        if(score > bestScore){
+          bestScore = score;
+          bestIndex = i;
+        }
+      }
+      return bestIndex;
+    }
+
+    function toObjects(rows, headerRowIndex){
+      const headersRaw = rows[headerRowIndex] || [];
+      const headers = headersRaw.map((h, idx) => {
+        const t = String(h ?? '').trim();
+        return t || ('COL_' + (idx+1));
+      });
+      const data = [];
+      for(let i=headerRowIndex+1; i<rows.length; i++){
+        const row = rows[i] || [];
+        const hasAny = row.some(v => String(v ?? '').trim() !== '');
+        if(!hasAny) continue;
+        const obj = {};
+        headers.forEach((h, idx)=> obj[h] = row[idx] ?? '');
+        data.push(obj);
+      }
+      return data;
+    }
+
+    function findColumnName(columns, keywords){
+      for(const col of columns){
+        const n = normalizeText(col);
+        if(keywords.some(k => n.includes(k))) return col;
+      }
+      return null;
+    }
+
+    function buildMemberMap(memberRows){
+      const columns = Object.keys(memberRows[0] || {});
+      const idCol = findColumnName(columns, ['mã hội viên', 'ma hoi vien', 'vtf_tid', 'vtf tid', 'mã hv', 'ma hv']);
+      const nameCol = findColumnName(columns, ['họ và tên', 'ho va ten', 'họ tên', 'ho ten', 'tên hội viên', 'ten']);
+
+      if(!idCol || !nameCol){
+        throw new Error('Không tìm thấy cột "Mã hội viên" hoặc "Họ và tên" trong file DSHV.');
+      }
+
+      const map = new Map();
+      memberRows.forEach(r => {
+        const id = String(r[idCol] ?? '').trim();
+        const name = String(r[nameCol] ?? '').trim();
+        if(id) map.set(id, name || '');
+      });
+      return { map, idCol, nameCol };
+    }
+
+    function mergeRows(vtfRows, memberMap){
+      const columns = Object.keys(vtfRows[0] || {});
+      const tidCol = findColumnName(columns, ['vtf_tid', 'vtf tid', 'mã hội viên', 'ma hoi vien']);
+      if(!tidCol) throw new Error('Không tìm thấy cột "VTF_TID" trong file thứ 2.');
+
+      return vtfRows.map((row) => {
+        const id = String(row[tidCol] ?? '').trim();
+        const fullName = memberMap.get(id) || 'Không tìm thấy';
+        const out = {};
+        Object.keys(row).forEach(key => {
+          out[key] = row[key];
+          if(key === tidCol) out['Họ và tên'] = fullName;
+        });
+        if(!Object.prototype.hasOwnProperty.call(out, 'Họ và tên')) out['Họ và tên'] = fullName;
+        out['Trạng thái ghép'] = fullName === 'Không tìm thấy' ? 'Không khớp' : 'Khớp';
+        return out;
+      });
+    }
+
+    function renderTable(rows){
+      const thead = previewTable.querySelector('thead');
+      const tbody = previewTable.querySelector('tbody');
+      if(!rows.length){
+        thead.innerHTML = '';
+        tbody.innerHTML = '<tr><td class="hint">Không có dữ liệu.</td></tr>';
+        return;
+      }
+      const cols = Object.keys(rows[0]);
+      thead.innerHTML = '<tr>' + cols.map(c => `<th>${escapeHtml(c)}</th>`).join('') + '</tr>';
+
+      const maxPreview = Math.min(rows.length, 300);
+      tbody.innerHTML = rows.slice(0, maxPreview).map(r => {
+        const notFound = r['Trạng thái ghép'] === 'Không khớp';
+        return `<tr class="${notFound ? 'not-found' : ''}">` + cols.map(c => {
+          let val = r[c] ?? '';
+          if(c === 'Trạng thái ghép'){
+            const cls = val === 'Khớp' ? 'ok' : 'warn';
+            return `<td><span class="pill ${cls}">${escapeHtml(val)}</span></td>`;
+          }
+          return `<td>${escapeHtml(val)}</td>`;
+        }).join('') + '</tr>';
+      }).join('');
+    }
+
+    function escapeHtml(str){
+      return String(str ?? '')
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;')
+        .replace(/'/g,'&#039;');
+    }
+
+    function updateStats(total, matched, notFound, members){
+      $('stTotal').textContent = total;
+      $('stMatched').textContent = matched;
+      $('stNotFound').textContent = notFound;
+      $('stMembers').textContent = members;
+      statsBox.style.display = 'grid';
+    }
+
+    async function parseWorkbook(file){
+      const buffer = await readFileAsArrayBuffer(file);
+      const wb = XLSX.read(buffer, {type:'array'});
+      const firstSheet = wb.Sheets[wb.SheetNames[0]];
+      return sheetToRows(firstSheet);
+    }
+
+    btnMerge.addEventListener('click', async () => {
+      try{
+        if(!fileDSHV.files[0] || !fileVTF.files[0]){
+          throw new Error('Bạn cần chọn đủ 2 file Excel.');
+        }
+
+        btnMerge.disabled = true;
+        btnDownload.disabled = true;
+        setStatus('Đang đọc và ghép dữ liệu...');
+
+        const [dshvMatrix, vtfMatrix] = await Promise.all([
+          parseWorkbook(fileDSHV.files[0]),
+          parseWorkbook(fileVTF.files[0])
+        ]);
+
+        const dshvHeaderRow = findBestHeaderRow(dshvMatrix, [
+          ['mã hội viên', 'ma hoi vien', 'vtf_tid'],
+          ['họ và tên', 'ho va ten', 'họ tên', 'ho ten']
+        ]);
+        const vtfHeaderRow = findBestHeaderRow(vtfMatrix, [
+          ['vtf_tid', 'vtf tid', 'mã hội viên', 'ma hoi vien']
+        ]);
+
+        if(dshvHeaderRow < 0) throw new Error('Không xác định được dòng tiêu đề của file DSHV.');
+        if(vtfHeaderRow < 0) throw new Error('Không xác định được dòng tiêu đề của file VTF.');
+
+        const dshvRows = toObjects(dshvMatrix, dshvHeaderRow);
+        const vtfRows = toObjects(vtfMatrix, vtfHeaderRow);
+
+        const { map: memberMap } = buildMemberMap(dshvRows);
+        mergedRows = mergeRows(vtfRows, memberMap);
+
+        const matched = mergedRows.filter(r => r['Trạng thái ghép'] === 'Khớp').length;
+        const notFound = mergedRows.length - matched;
+
+        renderTable(mergedRows);
+        updateStats(mergedRows.length, matched, notFound, dshvRows.length);
+        btnDownload.disabled = mergedRows.length === 0;
+        setStatus(`Đã ghép xong ${mergedRows.length} dòng. Khớp: ${matched}. Không khớp: ${notFound}.`);
+      }catch(err){
+        console.error(err);
+        mergedRows = [];
+        renderTable([]);
+        statsBox.style.display = 'none';
+        btnDownload.disabled = true;
+        setStatus(err.message || 'Có lỗi xảy ra.', true);
+      }finally{
+        btnMerge.disabled = false;
+      }
+    });
+
+    btnDownload.addEventListener('click', () => {
+      try{
+        if(!mergedRows.length) throw new Error('Chưa có dữ liệu để tải.');
+        const ws = XLSX.utils.json_to_sheet(mergedRows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Ket_qua');
+
+        const cols = Object.keys(mergedRows[0] || {});
+        ws['!cols'] = cols.map(col => {
+          let maxLen = String(col).length;
+          for(const row of mergedRows){
+            maxLen = Math.max(maxLen, String(row[col] ?? '').length);
+          }
+          return { wch: Math.min(Math.max(maxLen + 2, 12), 40) };
+        });
+
+        XLSX.writeFile(wb, 'Danh_sach_thi_cap_chuan.xlsx');
+        setStatus('Đã tải file Excel kết quả.');
+      }catch(err){
+        setStatus(err.message || 'Không thể tải file.', true);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      fileDSHV.value = '';
+      fileVTF.value = '';
+      mergedRows = [];
+      renderTable([]);
+      statsBox.style.display = 'none';
+      btnDownload.disabled = true;
+      setStatus('Đã làm mới.');
+    });
+  </script>
+</body>
+</html>
